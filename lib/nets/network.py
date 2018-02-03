@@ -104,7 +104,7 @@ class Network(object):
                                     [tf.float32, tf.float32], name="proposal")
 
       print('Going to print rois:')
-      print(rois.eval())
+      print(rois)
 
       rois.set_shape([None, 5])
       rpn_scores.set_shape([None, 1])
@@ -312,8 +312,8 @@ class Network(object):
 
       # print('get_tensor_by_name of the conv_5_3 activation:', tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0'))
       # with tf.variable_scope("pool5") as scope:
-      # t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
-      # print(sess.run(t))
+      t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
+      print(t)
       print('***--Going Inside--***')
       rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
       # Try to have a deterministic order for the computing graph, for reproducibility
