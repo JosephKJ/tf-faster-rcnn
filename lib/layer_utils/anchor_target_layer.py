@@ -17,9 +17,9 @@ from model.bbox_transform import bbox_transform
 
 def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anchors, num_anchors):
 
-  # print("*********")
-  # print(activations)
-  # print("*********")
+  print("*********")
+  print(rpn_cls_score)
+  print("*********")
 
   """Same as the anchor target layer in original Fast/er RCNN """
   A = num_anchors
