@@ -306,7 +306,11 @@ class Network(object):
     if is_training:
       rois, roi_scores = self._proposal_layer(rpn_cls_prob, rpn_bbox_pred, "rois")
 
-      print('Shape of the conv_5_3 activation:', tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3:0'))
+      tsrs = [tensor.name for tensor in tf.get_default_graph().as_graph_def().node]
+      print('---')
+      print(tsrs)
+      print('---')
+      # print('Shape of the conv_5_3 activation:', tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3:0'))
 
       rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
       # Try to have a deterministic order for the computing graph, for reproducibility
