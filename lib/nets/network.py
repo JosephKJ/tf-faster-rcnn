@@ -104,7 +104,7 @@ class Network(object):
                                     [tf.float32, tf.float32], name="proposal")
 
       print('Going to print rois:')
-      print(rois)
+      print(rois.eval())
 
       rois.set_shape([None, 5])
       rpn_scores.set_shape([None, 1])
