@@ -123,11 +123,6 @@ class SolverWrapper(object):
                                             anchor_ratios=cfg.ANCHOR_RATIOS)
       # Define the loss
       loss = layers['total_loss']
-
-      t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
-      print(sess.run(t))
-      print('***---***')
-
       # Set learning rate and momentum
       lr = tf.Variable(cfg.TRAIN.LEARNING_RATE, trainable=False)
       self.optimizer = tf.train.MomentumOptimizer(lr, cfg.TRAIN.MOMENTUM)
