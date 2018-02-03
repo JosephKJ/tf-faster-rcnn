@@ -15,7 +15,7 @@ import numpy.random as npr
 from utils.cython_bbox import bbox_overlaps
 from model.bbox_transform import bbox_transform
 
-def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anchors, num_anchors, activations):
+def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anchors, num_anchors):
 
   # print("*********")
   # print(activations)
