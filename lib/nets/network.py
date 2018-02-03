@@ -310,7 +310,7 @@ class Network(object):
       # with tf.variable_scope("pool5") as scope:
       # t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
       # print(sess.run(t))
-      # print('***---***')
+      print('***--Going Inside--***')
       rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
       # Try to have a deterministic order for the computing graph, for reproducibility
       with tf.control_dependencies([rpn_labels]):
