@@ -313,7 +313,7 @@ class Network(object):
       # print('get_tensor_by_name of the conv_5_3 activation:', tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0'))
       # with tf.variable_scope("pool5") as scope:
       t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
-      print(t.value())
+      print(t.eval())
       print(t)
       print('***--Going Inside--***')
       rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
