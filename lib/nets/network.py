@@ -305,6 +305,9 @@ class Network(object):
                                 padding='VALID', activation_fn=None, scope='rpn_bbox_pred')
     if is_training:
       rois, roi_scores = self._proposal_layer(rpn_cls_prob, rpn_bbox_pred, "rois")
+
+      print('Shape of the conv_5_3 activation:', net_conv.get_shape)
+
       rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
       # Try to have a deterministic order for the computing graph, for reproducibility
       with tf.control_dependencies([rpn_labels]):
