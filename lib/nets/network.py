@@ -136,11 +136,11 @@ class Network(object):
   def _dropout_layer(self, bottom, name, ratio=0.5):
     return tf.nn.dropout(bottom, ratio, name=name)
 
-  def _anchor_target_layer(self, rpn_cls_score, name):
+  def _anchor_target_layer(self, rpn_cls_score, name, activations=None):
     with tf.variable_scope(name) as scope:
       rpn_labels, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights = tf.py_func(
         anchor_target_layer,
-        [rpn_cls_score, self._gt_boxes, self._im_info, self._feat_stride, self._anchors, self._num_anchors],
+        [rpn_cls_score, self._gt_boxes, self._im_info, self._feat_stride, self._anchors, self._num_anchors, activations],
         [tf.float32, tf.float32, tf.float32, tf.float32],
         name="anchor_target")
 
@@ -306,13 +306,13 @@ class Network(object):
     if is_training:
       rois, roi_scores = self._proposal_layer(rpn_cls_prob, rpn_bbox_pred, "rois")
 
-      tsrs = [tensor.name for tensor in tf.get_default_graph().as_graph_def().node]
-      print('---')
-      print(tsrs)
-      print('---')
-      # print('Shape of the conv_5_3 activation:', tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3:0'))
+      # tsrs = [tensor.name for tensor in tf.get_default_graph().as_graph_def().node]
+      # print('---')
+      # print(tsrs)
+      # print('---')
+      # # print('Shape of the conv_5_3 activation:', tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3:0'))
 
-      rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
+      rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor", activations=net_conv)
       # Try to have a deterministic order for the computing graph, for reproducibility
       with tf.control_dependencies([rpn_labels]):
         rois, _ = self._proposal_target_layer(rois, roi_scores, "rpn_rois")
