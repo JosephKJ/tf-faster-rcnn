@@ -312,9 +312,9 @@ class Network(object):
 
       # print('get_tensor_by_name of the conv_5_3 activation:', tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0'))
       # with tf.variable_scope("pool5") as scope:
-      t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
-      print(sess.run(t.eval()))
-      print(t)
+      # t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
+      # print(t.eval())
+      # print(t)
       print('***--Going Inside--***')
       rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
       # Try to have a deterministic order for the computing graph, for reproducibility
@@ -474,6 +474,8 @@ class Network(object):
                                                                         self._losses['total_loss'],
                                                                         train_op],
                                                                        feed_dict=feed_dict)
+    print('I am here...')
+
     return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss
 
   def train_step_with_summary(self, sess, blobs, train_op):
@@ -487,6 +489,10 @@ class Network(object):
                                                                                  self._summary_op,
                                                                                  train_op],
                                                                                 feed_dict=feed_dict)
+
+    t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
+    print(t.eval())
+    print('I am here')
     return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, summary
 
   def train_step_no_return(self, sess, blobs, train_op):
