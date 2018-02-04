@@ -491,7 +491,7 @@ class Network(object):
                                                                                 feed_dict=feed_dict)
 
     t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
-    print(t.eval())
+    # print(t.eval())
     print('I am here')
     return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, summary
 
