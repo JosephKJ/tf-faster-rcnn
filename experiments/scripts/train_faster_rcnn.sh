@@ -20,7 +20,7 @@ case ${DATASET} in
     TEST_IMDB="voc_2007_test"
     STEPSIZE="[50000]"
     ITERS=70000
-#    ITERS=1
+    # ITERS=1
     ANCHORS="[8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
