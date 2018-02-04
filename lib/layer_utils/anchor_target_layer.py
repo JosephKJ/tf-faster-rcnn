@@ -15,11 +15,11 @@ import numpy.random as npr
 from utils.cython_bbox import bbox_overlaps
 from model.bbox_transform import bbox_transform
 
-def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anchors, num_anchors):
+def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anchors, num_anchors, extra_value):
 
   print("Joseph")
-  # print(rpn_cls_score)
-  # print("*********")
+  print(extra_value)
+  print("*********")
 
   """Same as the anchor target layer in original Fast/er RCNN """
   A = num_anchors
