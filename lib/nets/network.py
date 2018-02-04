@@ -318,7 +318,7 @@ class Network(object):
 
       print('***--Going Inside--***')
       with tf.variable_scope('my_scope') as scope:
-          result = tf.py_func(get_conv_5_tensor, [t.eval()], tf.float32, name='custom_function')
+          result = tf.py_func(get_conv_5_tensor, [[1,2,3]], tf.float32, name='custom_function')
           print(result)
       print('***--Coming out--***')
 
