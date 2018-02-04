@@ -27,7 +27,7 @@ def proposal_layer(rpn_cls_prob, rpn_bbox_pred, im_info, cfg_key, _feat_stride, 
   scores = rpn_cls_prob[:, :, :, num_anchors:]
 
   print('ousepachan: Start')
-  print(rpn_cls_prob)
+  # print(rpn_cls_prob)
   print('ousepachan: End')
 
   rpn_bbox_pred = rpn_bbox_pred.reshape((-1, 4))
