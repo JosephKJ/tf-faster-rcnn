@@ -123,6 +123,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anch
   labels = labels.reshape((1, height, width, A)).transpose(0, 3, 1, 2)
   labels = labels.reshape((1, 1, A * height, width))
   rpn_labels = labels
+  print ('Label shape: ', rpn_labels.shape)
 
   # bbox_targets
   bbox_targets = bbox_targets \
