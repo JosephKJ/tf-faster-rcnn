@@ -31,5 +31,5 @@ def generate_anchors_pre(height, width, feat_stride, anchor_scales=(8,16,32), an
 
 def get_conv_5_tensor(tensor):
   print('Inside the custom function')
-  print(tensor.eval())
+  print(tensor)
   return 1.0
