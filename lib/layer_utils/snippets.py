@@ -27,3 +27,9 @@ def generate_anchors_pre(height, width, feat_stride, anchor_scales=(8,16,32), an
   length = np.int32(anchors.shape[0])
 
   return anchors, length
+
+
+def get_conv_5_tensor(tensor):
+  print('Inside the custom function')
+  print(tensor)
+  return 1.0

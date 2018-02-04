@@ -15,6 +15,7 @@ from tensorflow.contrib.slim import arg_scope
 import numpy as np
 
 from layer_utils.snippets import generate_anchors_pre
+from layer_utils.snippets import get_conv_5_tensor
 from layer_utils.proposal_layer import proposal_layer
 from layer_utils.proposal_top_layer import proposal_top_layer
 from layer_utils.anchor_target_layer import anchor_target_layer
@@ -313,8 +314,10 @@ class Network(object):
       # print('get_tensor_by_name of the conv_5_3 activation:', tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0'))
       # with tf.variable_scope("pool5") as scope:
       t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
-      print(t.eval())
-      # print(t)
+      # print(t.eval())
+      result = tf.py_func(get_conv_5_tensor, [t], tf.float32)
+      print(result)
+
       print('***--Going Inside--***')
       rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
       # Try to have a deterministic order for the computing graph, for reproducibility
