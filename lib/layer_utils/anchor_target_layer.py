@@ -14,12 +14,26 @@ import numpy as np
 import numpy.random as npr
 from utils.cython_bbox import bbox_overlaps
 from model.bbox_transform import bbox_transform
+import scipy
 
 def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anchors, num_anchors, activations):
 
   print("Joseph")
-  print(activations.shape)
-  print("*********")
+  # print(rpn_cls_score.shape)
+  # print("---*---")
+  # print(gt_boxes)
+  # print("---*---")
+  # print(im_info)
+  # print("---*---")
+  # print(_feat_stride)
+  # print("---*---")
+  # print(all_anchors[0])
+  # print(all_anchors.shape)
+  # print("---*---")
+  # print(num_anchors)
+  # print("---*---")
+  # print(activations.shape)
+  # print("*********")
 
   """Same as the anchor target layer in original Fast/er RCNN """
   A = num_anchors
@@ -43,6 +57,13 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anch
   # keep only inside anchors
   anchors = all_anchors[inds_inside, :]
 
+  # print('>>>')
+  # print(all_anchors.shape)
+  # print(anchors.shape)
+  # print(len(inds_inside))
+  # print(inds_inside[:10])
+  # print('<<<')
+
   # label: 1 is positive, 0 is negative, -1 is dont care
   labels = np.empty((len(inds_inside),), dtype=np.float32)
   labels.fill(-1)
@@ -52,6 +73,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anch
   overlaps = bbox_overlaps(
     np.ascontiguousarray(anchors, dtype=np.float),
     np.ascontiguousarray(gt_boxes, dtype=np.float))
+
   argmax_overlaps = overlaps.argmax(axis=1)
   max_overlaps = overlaps[np.arange(len(inds_inside)), argmax_overlaps]
   gt_argmax_overlaps = overlaps.argmax(axis=0)
@@ -90,6 +112,23 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anch
       bg_inds, size=(len(bg_inds) - num_bg), replace=False)
     labels[disable_inds] = -1
 
+  # Calculating the rpn weights
+  objectness_map = _generate_objectness_map(activations, im_info)
+  rpn_weights = np.ones((len(inds_inside),), dtype=np.float32)
+  valid_indices = np.where(labels == 1)[0]
+  for i in valid_indices:
+      x1, y1, x2, y2 = anchors[i]
+      rpn_weights[i] = np.max([1, np.sum(objectness_map[int(y1):int(y2), int(x1):int(x2)])])
+
+  # print('---->>>')
+  # print(labels.shape)
+  # print(anchors.shape)
+  # print(anchors[labels == 1])
+  # print(rpn_weights.max())
+  # print(rpn_weights.min())
+  # print(rpn_weights.shape)
+  # print('<<<----')
+
   bbox_targets = np.zeros((len(inds_inside), 4), dtype=np.float32)
   bbox_targets = _compute_targets(anchors, gt_boxes[argmax_overlaps, :])
 
@@ -115,14 +154,28 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anch
 
   # map up to original set of anchors
   labels = _unmap(labels, total_anchors, inds_inside, fill=-1)
+  rpn_weights = _unmap(rpn_weights, total_anchors, inds_inside, fill=1)
   bbox_targets = _unmap(bbox_targets, total_anchors, inds_inside, fill=0)
   bbox_inside_weights = _unmap(bbox_inside_weights, total_anchors, inds_inside, fill=0)
   bbox_outside_weights = _unmap(bbox_outside_weights, total_anchors, inds_inside, fill=0)
+
+
+  # print('After unmap: ', rpn_weights)
+  # print('After unmap (shape): ', rpn_weights.shape)
 
   # labels
   labels = labels.reshape((1, height, width, A)).transpose(0, 3, 1, 2)
   labels = labels.reshape((1, 1, A * height, width))
   rpn_labels = labels
+
+  # rpn_weights
+  rpn_weights = rpn_weights.reshape((1, height, width, A)).transpose(0, 3, 1, 2)
+  rpn_weights = rpn_weights.reshape((1, 1, A * height, width))
+  rpn_weights = rpn_weights
+
+  # print('After transposing: ', rpn_weights)
+  # print('After transposing (shape): ', rpn_weights.shape)
+  # print('After transposing (shape_labels): ', labels.shape)
 
   # bbox_targets
   bbox_targets = bbox_targets \
@@ -140,7 +193,13 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anch
     .reshape((1, height, width, A * 4))
 
   rpn_bbox_outside_weights = bbox_outside_weights
-  return rpn_labels, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights
+  # print('rpn_labels: ', rpn_labels.shape)
+  # print('rpn_labels(new): ', np.reshape(rpn_labels, [-1]).shape)
+  # print('rpn_bbox_targets: ', rpn_bbox_targets.shape)
+  # print('rpn_bbox_inside_weights: ', rpn_bbox_inside_weights.shape)
+  # print('rpn_bbox_outside_weights: ', rpn_bbox_outside_weights.shape)
+
+  return rpn_labels, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights, rpn_weights
 
 
 def _unmap(data, count, inds, fill=0):
@@ -159,9 +218,30 @@ def _unmap(data, count, inds, fill=0):
 
 def _compute_targets(ex_rois, gt_rois):
   """Compute bounding-box regression targets for an image."""
-
   assert ex_rois.shape[0] == gt_rois.shape[0]
   assert ex_rois.shape[1] == 4
   assert gt_rois.shape[1] == 5
 
   return bbox_transform(ex_rois, gt_rois[:, :4]).astype(np.float32, copy=False)
+
+
+def _generate_objectness_map(activations, im_info):
+  act = activations.transpose(0, 3, 1, 2)
+  # Generate Map
+  feature_map = np.sum(act[0], axis=0)
+  # Resize it to orininal size
+  feature_map = scipy.misc.imresize(feature_map, im_info[:2], interp='bicubic')
+  # Nomalize Map
+  feature_map = (255 * (feature_map - np.min(feature_map)) / np.ptp(feature_map)).astype(int)
+  return feature_map
+
+def _display_objectness_map(feature_sum, im_info):
+  # Nomalize Map
+  feature_sum = (255 * (feature_sum - np.min(feature_sum)) / np.ptp(feature_sum)).astype(int)
+  threshold = feature_sum.mean() + 20
+  feature_sum = np.ma.masked_where(feature_sum <= threshold, feature_sum)
+
+  # Scaling the map to the input image size.
+  feature_sum = scipy.misc.imresize(feature_sum, im_info[:2], interp='bicubic')
+  feature_sum = np.ma.masked_where(feature_sum <= threshold, feature_sum)
+  scipy.misc.imsave('/home/joseph/feature_sum'+ str(np.random.randint(99, size=1)[0])+'.png', feature_sum)

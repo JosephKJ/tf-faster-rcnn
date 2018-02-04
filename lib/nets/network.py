@@ -139,10 +139,10 @@ class Network(object):
   def _anchor_target_layer(self, rpn_cls_score, name):
     with tf.variable_scope(name) as scope:
       acts = tf.get_default_graph().get_tensor_by_name(self._scope + '/conv5/conv5_3/convolution:0')
-      rpn_labels, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights = tf.py_func(
+      rpn_labels, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights, rpn_weights = tf.py_func(
         anchor_target_layer,
         [rpn_cls_score, self._gt_boxes, self._im_info, self._feat_stride, self._anchors, self._num_anchors, acts],
-        [tf.float32, tf.float32, tf.float32, tf.float32],
+        [tf.float32, tf.float32, tf.float32, tf.float32, tf.float32],
         name="anchor_target")
 
       rpn_labels.set_shape([1, 1, None, None])
@@ -155,6 +155,7 @@ class Network(object):
       self._anchor_targets['rpn_bbox_targets'] = rpn_bbox_targets
       self._anchor_targets['rpn_bbox_inside_weights'] = rpn_bbox_inside_weights
       self._anchor_targets['rpn_bbox_outside_weights'] = rpn_bbox_outside_weights
+      self._anchor_targets['rpn_weights'] = rpn_weights
 
       self._score_summaries.update(self._anchor_targets)
 
@@ -250,9 +251,16 @@ class Network(object):
       # RPN, class loss
       rpn_cls_score = tf.reshape(self._predictions['rpn_cls_score_reshape'], [-1, 2])
       rpn_label = tf.reshape(self._anchor_targets['rpn_labels'], [-1])
+      rpn_label_weight = tf.reshape(self._anchor_targets['rpn_weights'], [-1])
+
       rpn_select = tf.where(tf.not_equal(rpn_label, -1))
       rpn_cls_score = tf.reshape(tf.gather(rpn_cls_score, rpn_select), [-1, 2])
       rpn_label = tf.reshape(tf.gather(rpn_label, rpn_select), [-1])
+      rpn_label_weight = tf.reshape(tf.gather(rpn_label_weight, rpn_select), [-1])
+      print('--rpn_cls_score--', rpn_cls_score.shape)
+      print('--rpn_label--', rpn_label.shape)
+      print('--rpn_label_weight--', rpn_label_weight.shape)
+
       rpn_cross_entropy = tf.reduce_mean(
         tf.nn.sparse_softmax_cross_entropy_with_logits(logits=rpn_cls_score, labels=rpn_label))
 
