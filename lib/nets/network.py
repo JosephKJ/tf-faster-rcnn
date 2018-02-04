@@ -316,13 +316,14 @@ class Network(object):
       t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
       # print(t.eval())
 
-      result = tf.py_func(get_conv_5_tensor, [t], tf.float32, name='custom_function')
-      print(result)
-
       print('***--Going Inside--***')
       with tf.variable_scope('my_scope') as scope:
-        rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
+          result = tf.py_func(get_conv_5_tensor, [t], tf.float32, name='custom_function')
+          print(result)
       print('***--Coming out--***')
+
+      rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
+
       # Try to have a deterministic order for the computing graph, for reproducibility
       with tf.control_dependencies([rpn_labels]):
         rois, _ = self._proposal_target_layer(rois, roi_scores, "rpn_rois")
