@@ -139,6 +139,8 @@ class Network(object):
   def _anchor_target_layer(self, rpn_cls_score, name):
     with tf.variable_scope(name) as scope:
       t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/relu:0')
+      for op in tf.get_default_graph().get_operations():
+          print(str(op.name))
       rpn_labels, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights = tf.py_func(
         anchor_target_layer,
         [rpn_cls_score, self._gt_boxes, self._im_info, self._feat_stride, self._anchors, self._num_anchors, t],
