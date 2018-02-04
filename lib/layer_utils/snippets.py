@@ -29,7 +29,7 @@ def generate_anchors_pre(height, width, feat_stride, anchor_scales=(8,16,32), an
   return anchors, length
 
 
-def get_conv_5_tensor(tensor):
+def get_conv_5_tensor(jkj):
   print('Inside the custom function')
-  print(tensor)
+  print(jkj)
   return 1.0
