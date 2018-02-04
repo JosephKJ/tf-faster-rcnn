@@ -249,20 +249,20 @@ class Network(object):
   def _add_losses(self, sigma_rpn=3.0):
     with tf.variable_scope('LOSS_' + self._tag) as scope:
       # RPN, class loss
-      rpn_cls_score = tf.reshape(self._predictions['rpn_cls_score_reshape'], [-1, 2])
+      rpn_cls_score = tf.reshape(self._predictions['rpn_cls_score_reshape'], [-1])
       rpn_label = tf.reshape(self._anchor_targets['rpn_labels'], [-1])
       rpn_label_weight = tf.reshape(self._anchor_targets['rpn_weights'], [-1])
 
       rpn_select = tf.where(tf.not_equal(rpn_label, -1))
-      rpn_cls_score = tf.reshape(tf.gather(rpn_cls_score, rpn_select), [-1, 2])
+      rpn_cls_score = tf.reshape(tf.gather(rpn_cls_score, rpn_select), [-1])
       rpn_label = tf.reshape(tf.gather(rpn_label, rpn_select), [-1])
       rpn_label_weight = tf.reshape(tf.gather(rpn_label_weight, rpn_select), [-1])
-      print('--rpn_cls_score--', rpn_cls_score.shape)
-      print('--rpn_label--', rpn_label.shape)
-      print('--rpn_label_weight--', rpn_label_weight.shape)
 
       rpn_cross_entropy = tf.reduce_mean(
-        tf.nn.sparse_softmax_cross_entropy_with_logits(logits=rpn_cls_score, labels=rpn_label))
+        tf.nn.weighted_cross_entropy_with_logits(logits=rpn_cls_score, targets=tf.to_float(rpn_label), pos_weight=rpn_label_weight))
+
+      # rpn_cross_entropy = tf.reduce_mean(
+      #   tf.nn.sparse_softmax_cross_entropy_with_logits(logits=rpn_cls_score, labels=rpn_label))
 
       # RPN, bbox loss
       rpn_bbox_pred = self._predictions['rpn_bbox_pred']
