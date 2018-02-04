@@ -320,7 +320,9 @@ class Network(object):
       print(result)
 
       print('***--Going Inside--***')
-      rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
+      with tf.variable_scope('my_scope') as scope:
+        rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
+      print('***--Coming out--***')
       # Try to have a deterministic order for the computing graph, for reproducibility
       with tf.control_dependencies([rpn_labels]):
         rois, _ = self._proposal_target_layer(rois, roi_scores, "rpn_rois")
