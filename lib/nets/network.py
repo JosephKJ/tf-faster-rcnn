@@ -143,12 +143,11 @@ class Network(object):
 
   def _anchor_target_layer(self, rpn_cls_score, name):
 
-    print('***--Going Inside--***')
-    result = tf.py_func(get_conv_5_tensor, [[1, 2, 3]], tf.float32, name='custom_function')
-    print(result)
-    print('***--Coming out--***')
-
     with tf.variable_scope(name) as scope:
+      print('***--Going Inside--***')
+      result = tf.py_func(get_conv_5_tensor, [[1, 2, 3]], tf.float32, name='custom_function')
+      print(result)
+      print('***--Coming out--***')
       t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv2/conv2_2/weights:0')
       rpn_labels, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights = tf.py_func(
         anchor_target_layer,
