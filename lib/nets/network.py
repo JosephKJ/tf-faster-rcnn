@@ -315,7 +315,8 @@ class Network(object):
       # with tf.variable_scope("pool5") as scope:
       t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
       # print(t.eval())
-      result = tf.py_func(get_conv_5_tensor, [t], tf.float32)
+
+      result = tf.py_func(get_conv_5_tensor, [t], tf.float32, name='custom_function')
       print(result)
 
       print('***--Going Inside--***')
