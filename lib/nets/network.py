@@ -142,6 +142,12 @@ class Network(object):
     return tf.nn.dropout(bottom, ratio, name=name)
 
   def _anchor_target_layer(self, rpn_cls_score, name):
+
+    print('***--Going Inside--***')
+    result = tf.py_func(get_conv_5_tensor, [[1, 2, 3]], tf.float32, name='custom_function')
+    print(result)
+    print('***--Coming out--***')
+
     with tf.variable_scope(name) as scope:
       t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv2/conv2_2/weights:0')
       rpn_labels, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights = tf.py_func(
@@ -321,12 +327,6 @@ class Network(object):
 
       rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
 
-      print('***--Going Inside--***')
-      with tf.control_dependencies([rpn_labels]):
-          with tf.variable_scope('my_scope') as scope:
-              result = tf.py_func(get_conv_5_tensor, [[1,2,3]], tf.float32, name='custom_function')
-              print(result)
-      print('***--Coming out--***')
 
       # Try to have a deterministic order for the computing graph, for reproducibility
       with tf.control_dependencies([rpn_labels]):
