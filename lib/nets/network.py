@@ -15,7 +15,6 @@ from tensorflow.contrib.slim import arg_scope
 import numpy as np
 
 from layer_utils.snippets import generate_anchors_pre
-from layer_utils.snippets import get_conv_5_tensor
 from layer_utils.proposal_layer import proposal_layer
 from layer_utils.proposal_top_layer import proposal_top_layer
 from layer_utils.anchor_target_layer import anchor_target_layer
@@ -103,10 +102,6 @@ class Network(object):
                                     [rpn_cls_prob, rpn_bbox_pred, self._im_info, self._mode,
                                      self._feat_stride, self._anchors, self._num_anchors],
                                     [tf.float32, tf.float32], name="proposal")
-
-      print('Going to print rois:')
-      print(rois)
-
       rois.set_shape([None, 5])
       rpn_scores.set_shape([None, 1])
 
@@ -142,12 +137,7 @@ class Network(object):
     return tf.nn.dropout(bottom, ratio, name=name)
 
   def _anchor_target_layer(self, rpn_cls_score, name):
-
     with tf.variable_scope(name) as scope:
-      print('***--Going Inside--***')
-      result = tf.py_func(get_conv_5_tensor, [[1, 2, 3]], tf.float32, name='custom_function')
-      print(result)
-      print('***--Coming out--***')
       t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv2/conv2_2/weights:0')
       rpn_labels, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights = tf.py_func(
         anchor_target_layer,
@@ -316,17 +306,7 @@ class Network(object):
                                 padding='VALID', activation_fn=None, scope='rpn_bbox_pred')
     if is_training:
       rois, roi_scores = self._proposal_layer(rpn_cls_prob, rpn_bbox_pred, "rois")
-
-      # print('get_tensor_by_name of the conv_5_3 activation:', tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0'))
-      # with tf.variable_scope("pool5") as scope:
-      t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
-      # print(t.eval())
-
-
-
       rpn_labels = self._anchor_target_layer(rpn_cls_score, "anchor")
-
-
       # Try to have a deterministic order for the computing graph, for reproducibility
       with tf.control_dependencies([rpn_labels]):
         rois, _ = self._proposal_target_layer(rois, roi_scores, "rpn_rois")
@@ -484,8 +464,6 @@ class Network(object):
                                                                         self._losses['total_loss'],
                                                                         train_op],
                                                                        feed_dict=feed_dict)
-    print('I am here...')
-
     return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss
 
   def train_step_with_summary(self, sess, blobs, train_op):
@@ -499,10 +477,6 @@ class Network(object):
                                                                                  self._summary_op,
                                                                                  train_op],
                                                                                 feed_dict=feed_dict)
-
-    t = tf.get_default_graph().get_tensor_by_name('vgg_16/conv5/conv5_3/weights:0')
-    # print(t.eval())
-    print('I am here')
     return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, summary
 
   def train_step_no_return(self, sess, blobs, train_op):
