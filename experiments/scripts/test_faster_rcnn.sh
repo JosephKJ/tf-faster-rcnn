@@ -50,7 +50,8 @@ set +x
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
   NET_FINAL=output/${NET}/${TRAIN_IMDB}/${EXTRA_ARGS_SLUG}/${NET}_faster_rcnn_iter_${ITERS}.ckpt
 else
-  NET_FINAL=output/${NET}/${TRAIN_IMDB}/default/${NET}_faster_rcnn_iter_${ITERS}.ckpt
+  NET_FINAL=output/${NET}/${TRAIN_IMDB}/default/vgg16_weighted_rpn_scores_iter_${ITERS}.ckpt
+  # NET_FINAL=output/${NET}/${TRAIN_IMDB}/default/${NET}_faster_rcnn_iter_${ITERS}.ckpt
 fi
 set -x
 
