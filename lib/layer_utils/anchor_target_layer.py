@@ -113,11 +113,11 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anch
 
   # Calculating the rpn weights
   rpn_weights = np.ones((len(inds_inside),), dtype=np.float32)
-  # objectness_map = _generate_objectness_map(activations, im_info)
-  # valid_indices = np.where(labels == 1)[0]
-  # for i in valid_indices:
-  #     x1, y1, x2, y2 = anchors[i]
-  #     rpn_weights[i] = np.max([1, np.sum(objectness_map[int(y1):int(y2), int(x1):int(x2)])])
+  objectness_map = _generate_objectness_map(activations, im_info)
+  valid_indices = np.where(labels == 1)[0]
+  for i in valid_indices:
+      x1, y1, x2, y2 = anchors[i]
+      rpn_weights[i] = np.max([1, np.sum(objectness_map[int(y1):int(y2), int(x1):int(x2)])])
 
   # print('---->>>')
   # print(labels.shape)
