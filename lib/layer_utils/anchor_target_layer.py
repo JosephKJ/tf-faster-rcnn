@@ -233,7 +233,7 @@ def _generate_objectness_map(activations, im_info):
   feature_map = scipy.misc.imresize(feature_map, im_info[:2], interp='bicubic')
   # Nomalize Map
   feature_map = (10 * (feature_map - np.min(feature_map)) / np.ptp(feature_map)).astype(int)
-  return feature_map
+  return (feature_map + 1)
 
 def _display_objectness_map(feature_sum, im_info):
   # Nomalize Map
